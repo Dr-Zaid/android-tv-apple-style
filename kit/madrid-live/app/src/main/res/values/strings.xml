@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Real Madrid Live</string>
+    <string name="channel_name">Live match</string>
+    <string name="channel_desc">Shown only while a Real Madrid match is being followed.</string>
+    <string name="notif_title">Real Madrid Live</string>
+</resources>

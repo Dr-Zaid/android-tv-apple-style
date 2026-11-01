@@ -1,0 +1,317 @@
+{
+ "timestamp": "2026-10-24T17:50:02Z",
+ "status": "success",
+ "team": {
+  "id": "86",
+  "displayName": "Real Madrid"
+ },
+ "events": [
+  {
+   "id": "401882832",
+   "date": "2026-10-25T20:00Z",
+   "name": "Real Madrid at Barcelona",
+   "shortName": "RMA @ BAR",
+   "timeValid": true,
+   "competitions": [
+    {
+     "id": "401882832",
+     "date": "2026-10-25T20:00Z",
+     "attendance": 0,
+     "timeValid": true,
+     "neutralSite": false,
+     "boxscoreAvailable": true,
+     "ticketsAvailable": true,
+     "venue": {
+      "fullName": "Spotify Camp Nou",
+      "address": {
+       "city": "Barcelona",
+       "country": "Spain"
+      }
+     },
+     "competitors": [
+      {
+       "id": "83",
+       "type": "team",
+       "order": 0,
+       "homeAway": "home",
+       "winner": false,
+       "team": {
+        "id": "83",
+        "location": "Barcelona",
+        "nickname": "Barça",
+        "abbreviation": "BAR",
+        "displayName": "Barcelona",
+        "shortDisplayName": "Barcelona",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/83.png",
+          "width": 500,
+          "height": 500,
+          "rel": [
+           "full",
+           "default"
+          ]
+         }
+        ]
+       }
+      },
+      {
+       "id": "86",
+       "type": "team",
+       "order": 1,
+       "homeAway": "away",
+       "winner": false,
+       "team": {
+        "id": "86",
+        "location": "Real Madrid",
+        "abbreviation": "RMA",
+        "displayName": "Real Madrid",
+        "shortDisplayName": "Real Madrid",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/86.png",
+          "width": 500,
+          "height": 500,
+          "rel": [
+           "full",
+           "default"
+          ]
+         }
+        ]
+       }
+      }
+     ],
+     "status": {
+      "clock": 0.0,
+      "addedClock": 0.0,
+      "displayClock": "0'",
+      "period": 0,
+      "type": {
+       "id": "1",
+       "name": "STATUS_SCHEDULED",
+       "state": "pre",
+       "completed": false,
+       "description": "Scheduled",
+       "detail": "Sun, October 25th at 4:00 PM EDT",
+       "shortDetail": "10/25 - 4:00 PM EDT"
+      }
+     }
+    }
+   ],
+   "league": {
+    "id": "740",
+    "alternateId": "15",
+    "name": "Spanish LALIGA",
+    "abbreviation": "LALIGA",
+    "shortName": "LALIGA",
+    "midsizeName": "ESP.1",
+    "slug": "esp.1",
+    "isTournament": false
+   }
+  },
+  {
+   "id": "401882819",
+   "date": "2026-11-01T15:15Z",
+   "name": "Real Madrid at Racing Santander",
+   "shortName": "RMA @ RAC",
+   "timeValid": true,
+   "competitions": [
+    {
+     "id": "401882819",
+     "date": "2026-11-01T15:15Z",
+     "attendance": 0,
+     "timeValid": true,
+     "neutralSite": false,
+     "boxscoreAvailable": true,
+     "ticketsAvailable": true,
+     "venue": {
+      "fullName": "El Sardineros",
+      "address": {
+       "city": "Santander",
+       "country": "Spain"
+      }
+     },
+     "competitors": [
+      {
+       "id": "87",
+       "type": "team",
+       "order": 0,
+       "homeAway": "home",
+       "winner": false,
+       "team": {
+        "id": "87",
+        "location": "Racing Santander",
+        "abbreviation": "RAC",
+        "displayName": "Racing Santander",
+        "shortDisplayName": "Racing",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/87.png",
+          "width": 500,
+          "height": 500,
+          "rel": [
+           "full",
+           "default"
+          ]
+         }
+        ]
+       }
+      },
+      {
+       "id": "86",
+       "type": "team",
+       "order": 1,
+       "homeAway": "away",
+       "winner": false,
+       "team": {
+        "id": "86",
+        "location": "Real Madrid",
+        "abbreviation": "RMA",
+        "displayName": "Real Madrid",
+        "shortDisplayName": "Real Madrid",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/86.png",
+          "width": 500,
+          "height": 500,
+          "rel": [
+           "full",
+           "default"
+          ]
+         }
+        ]
+       }
+      }
+     ],
+     "status": {
+      "clock": 0.0,
+      "addedClock": 0.0,
+      "displayClock": "0'",
+      "period": 0,
+      "type": {
+       "id": "1",
+       "name": "STATUS_SCHEDULED",
+       "state": "pre",
+       "completed": false,
+       "description": "Scheduled",
+       "detail": "Sun, November 1st at 10:15 AM EST",
+       "shortDetail": "11/1 - 10:15 AM EST"
+      }
+     }
+    }
+   ],
+   "league": {
+    "id": "740",
+    "alternateId": "15",
+    "name": "Spanish LALIGA",
+    "abbreviation": "LALIGA",
+    "shortName": "LALIGA",
+    "midsizeName": "ESP.1",
+    "slug": "esp.1",
+    "isTournament": false
+   }
+  },
+  {
+   "id": "401882808",
+   "date": "2026-11-07T20:00Z",
+   "name": "Real Madrid at Valencia",
+   "shortName": "RMA @ VAL",
+   "timeValid": true,
+   "competitions": [
+    {
+     "id": "401882808",
+     "date": "2026-11-07T20:00Z",
+     "attendance": 0,
+     "timeValid": true,
+     "neutralSite": false,
+     "boxscoreAvailable": true,
+     "ticketsAvailable": true,
+     "venue": {
+      "fullName": "Mestalla Stadium",
+      "address": {
+       "city": "Manises",
+       "country": "Spain"
+      }
+     },
+     "competitors": [
+      {
+       "id": "94",
+       "type": "team",
+       "order": 0,
+       "homeAway": "home",
+       "winner": false,
+       "team": {
+        "id": "94",
+        "location": "Valencia",
+        "abbreviation": "VAL",
+        "displayName": "Valencia",
+        "shortDisplayName": "Valencia",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/94.png",
+          "width": 500,
+          "height": 500,
+          "rel": [
+           "full",
+           "default"
+          ]
+         }
+        ]
+       }
+      },
+      {
+       "id": "86",
+       "type": "team",
+       "order": 1,
+       "homeAway": "away",
+       "winner": false,
+       "team": {
+        "id": "86",
+        "location": "Real Madrid",
+        "abbreviation": "RMA",
+        "displayName": "Real Madrid",
+        "shortDisplayName": "Real Madrid",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/86.png",
+          "width": 500,
+          "height": 500,
+          "rel": [
+           "full",
+           "default"
+          ]
+         }
+        ]
+       }
+      }
+     ],
+     "status": {
+      "clock": 0.0,
+      "addedClock": 0.0,
+      "displayClock": "0'",
+      "period": 0,
+      "type": {
+       "id": "1",
+       "name": "STATUS_SCHEDULED",
+       "state": "pre",
+       "completed": false,
+       "description": "Scheduled",
+       "detail": "Sat, November 7th at 3:00 PM EST",
+       "shortDetail": "11/7 - 3:00 PM EST"
+      }
+     }
+    }
+   ],
+   "league": {
+    "id": "740",
+    "alternateId": "15",
+    "name": "Spanish LALIGA",
+    "abbreviation": "LALIGA",
+    "shortName": "LALIGA",
+    "midsizeName": "ESP.1",
+    "slug": "esp.1",
+    "isTournament": false
+   }
+  }
+ ]
+}

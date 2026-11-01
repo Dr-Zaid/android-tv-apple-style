@@ -1,0 +1,43 @@
+name: Device report / تقرير جهاز
+description: كلنا شلون طلع الـ kit على تلفزيونك (اشتغل، اشتغل جزئياً، لو ما اشتغل). Tell us how the kit went on your TV.
+title: "[Device] <brand and model>"
+labels: ["device-report"]
+body:
+  - type: input
+    id: tv
+    attributes:
+      label: التلفزيون أو الستيك (الماركة والموديل) / TV or stick (brand and model)
+      placeholder: Xiaomi Mi TV Stick MiTV-AESP0
+    validations:
+      required: true
+  - type: input
+    id: android
+    attributes:
+      label: نسخة Android، و Android TV لو Google TV / Android version
+      placeholder: Android TV 9
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: شلون طلعت؟ / How did it go?
+      options:
+        - Worked
+        - Worked, with problems
+        - Did not work
+    validations:
+      required: true
+  - type: dropdown
+    id: prompt
+    attributes:
+      label: أي برومبت استخدمت؟ / Which prompt did you use?
+      options:
+        - PROMPT.md (fast)
+        - PROMPT-FULL.md (with numbers)
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: شنو صار؟ (شنو اخترت، شنو فشل، شنو غيّرت) / What happened?
+      description: لا تلصق اسم الواي فاي أو كلمات السر أو بيانات حسابك. Please do not paste your Wi-Fi name, passwords or account details.

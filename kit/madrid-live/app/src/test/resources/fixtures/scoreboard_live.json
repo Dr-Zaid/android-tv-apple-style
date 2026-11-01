@@ -1,0 +1,310 @@
+{
+ "events": [
+  {
+   "id": "401882827",
+   "date": "2026-10-24T16:30Z",
+   "name": "Villarreal at Valencia",
+   "shortName": "VIL @ VAL",
+   "competitions": [
+    {
+     "id": "401882827",
+     "date": "2026-10-24T16:30Z",
+     "startDate": "2026-10-24T16:30Z",
+     "attendance": 0,
+     "timeValid": true,
+     "recent": true,
+     "status": {
+      "clock": 3720.0,
+      "displayClock": "62'",
+      "period": 2,
+      "type": {
+       "id": "26",
+       "name": "STATUS_SECOND_HALF",
+       "state": "in",
+       "completed": false,
+       "description": "Second Half",
+       "detail": "62'",
+       "shortDetail": "62'"
+      }
+     },
+     "venue": {
+      "id": "9659",
+      "fullName": "Mestalla Stadium",
+      "address": {
+       "city": "Manises",
+       "country": "Spain"
+      }
+     },
+     "altGameNote": "LALIGA",
+     "competitors": [
+      {
+       "id": "94",
+       "type": "team",
+       "order": 0,
+       "homeAway": "home",
+       "winner": false,
+       "score": "1",
+       "team": {
+        "id": "94",
+        "abbreviation": "VAL",
+        "displayName": "Valencia",
+        "shortDisplayName": "Valencia",
+        "name": "Valencia",
+        "location": "Valencia",
+        "color": "ffffff",
+        "alternateColor": "FF6F00",
+        "isActive": true,
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/94.png",
+        "venue": {
+         "id": "9659"
+        }
+       }
+      },
+      {
+       "id": "102",
+       "type": "team",
+       "order": 1,
+       "homeAway": "away",
+       "winner": false,
+       "score": "0",
+       "team": {
+        "id": "102",
+        "abbreviation": "VIL",
+        "displayName": "Villarreal",
+        "shortDisplayName": "Villarreal",
+        "name": "Villarreal",
+        "location": "Villarreal",
+        "color": "ffff00",
+        "alternateColor": "6cace4",
+        "isActive": true,
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/102.png",
+        "venue": {
+         "id": "55"
+        }
+       }
+      }
+     ],
+     "details": [
+      {
+       "type": {
+        "id": "94",
+        "text": "Yellow Card"
+       },
+       "clock": {
+        "value": 1991.0,
+        "displayValue": "34'"
+       },
+       "team": {
+        "id": "94"
+       },
+       "scoreValue": 0,
+       "scoringPlay": false,
+       "redCard": false,
+       "yellowCard": true,
+       "penaltyKick": false,
+       "ownGoal": false,
+       "shootout": false,
+       "athletesInvolved": [
+        {
+         "id": "253763",
+         "displayName": "Dani Raba",
+         "shortName": "D. Raba",
+         "fullName": "Dani Raba",
+         "jersey": "19",
+         "team": {
+          "id": "94"
+         },
+         "position": "SUB"
+        }
+       ]
+      },
+      {
+       "type": {
+        "id": "94",
+        "text": "Yellow Card"
+       },
+       "clock": {
+        "value": 2216.0,
+        "displayValue": "37'"
+       },
+       "team": {
+        "id": "102"
+       },
+       "scoreValue": 0,
+       "scoringPlay": false,
+       "redCard": false,
+       "yellowCard": true,
+       "penaltyKick": false,
+       "ownGoal": false,
+       "shootout": false,
+       "athletesInvolved": [
+        {
+         "id": "337011",
+         "displayName": "Renato Veiga",
+         "shortName": "R. Veiga",
+         "fullName": "Renato Veiga",
+         "jersey": "12",
+         "team": {
+          "id": "102"
+         },
+         "position": "CD-L"
+        }
+       ]
+      },
+      {
+       "type": {
+        "id": "98",
+        "text": "Penalty - Scored"
+       },
+       "clock": {
+        "value": 2254.0,
+        "displayValue": "38'"
+       },
+       "team": {
+        "id": "94"
+       },
+       "scoreValue": 1,
+       "scoringPlay": true,
+       "redCard": false,
+       "yellowCard": false,
+       "penaltyKick": true,
+       "ownGoal": false,
+       "shootout": false,
+       "athletesInvolved": [
+        {
+         "id": "231603",
+         "displayName": "Pepelu",
+         "shortName": "Pepelu",
+         "fullName": "Pepelu",
+         "jersey": "18",
+         "team": {
+          "id": "94"
+         },
+         "position": "CM-L"
+        }
+       ]
+      },
+      {
+       "type": {
+        "id": "94",
+        "text": "Yellow Card"
+       },
+       "clock": {
+        "value": 2535.0,
+        "displayValue": "43'"
+       },
+       "team": {
+        "id": "102"
+       },
+       "scoreValue": 0,
+       "scoringPlay": false,
+       "redCard": false,
+       "yellowCard": true,
+       "penaltyKick": false,
+       "ownGoal": false,
+       "shootout": false,
+       "athletesInvolved": [
+        {
+         "id": "192133",
+         "displayName": "Ayoze Pérez",
+         "shortName": "A. Pérez",
+         "fullName": "Ayoze Pérez",
+         "jersey": "22",
+         "team": {
+          "id": "102"
+         },
+         "position": "CF-L"
+        }
+       ]
+      },
+      {
+       "type": {
+        "id": "94",
+        "text": "Yellow Card"
+       },
+       "clock": {
+        "value": 3508.0,
+        "displayValue": "59'"
+       },
+       "team": {
+        "id": "102"
+       },
+       "scoreValue": 0,
+       "scoringPlay": false,
+       "redCard": false,
+       "yellowCard": true,
+       "penaltyKick": false,
+       "ownGoal": false,
+       "shootout": false,
+       "athletesInvolved": [
+        {
+         "id": "284769",
+         "displayName": "Tajon Buchanan",
+         "shortName": "T. Buchanan",
+         "fullName": "Tajon Buchanan",
+         "jersey": "17",
+         "team": {
+          "id": "102"
+         },
+         "headshot": "https://a.espncdn.com/i/headshots/soccer/players/full/284769.png",
+         "position": "LM"
+        }
+       ]
+      },
+      {
+       "type": {
+        "id": "94",
+        "text": "Yellow Card"
+       },
+       "clock": {
+        "value": 3572.0,
+        "displayValue": "60'"
+       },
+       "team": {
+        "id": "94"
+       },
+       "scoreValue": 0,
+       "scoringPlay": false,
+       "redCard": false,
+       "yellowCard": true,
+       "penaltyKick": false,
+       "ownGoal": false,
+       "shootout": false,
+       "athletesInvolved": [
+        {
+         "id": "222661",
+         "displayName": "Pablo Maffeo",
+         "shortName": "P. Maffeo",
+         "fullName": "Pablo Maffeo",
+         "jersey": "24",
+         "team": {
+          "id": "94"
+         },
+         "position": "RB"
+        }
+       ]
+      }
+     ],
+     "wasSuspended": false
+    }
+   ],
+   "status": {
+    "clock": 3720.0,
+    "displayClock": "62'",
+    "period": 2,
+    "type": {
+     "id": "26",
+     "name": "STATUS_SECOND_HALF",
+     "state": "in",
+     "completed": false,
+     "description": "Second Half",
+     "detail": "62'",
+     "shortDetail": "62'"
+    }
+   },
+   "venue": {
+    "displayName": "Mestalla Stadium"
+   }
+  }
+ ]
+}

@@ -1,0 +1,505 @@
+{
+ "header": {
+  "id": "401882839",
+  "timeValid": true,
+  "competitions": [
+   {
+    "id": "401882839",
+    "date": "2026-10-18T19:00Z",
+    "neutralSite": false,
+    "conferenceCompetition": false,
+    "boxscoreAvailable": true,
+    "commentaryAvailable": true,
+    "liveAvailable": false,
+    "onWatchESPN": true,
+    "recent": false,
+    "wallclockAvailable": true,
+    "playByPlaySource": "full",
+    "competitors": [
+     {
+      "id": "86",
+      "order": 0,
+      "homeAway": "home",
+      "winner": false,
+      "team": {
+       "id": "86",
+       "location": "Real Madrid",
+       "name": "Real Madrid",
+       "abbreviation": "RMA",
+       "displayName": "Real Madrid",
+       "shortDisplayName": "Real Madrid",
+       "color": "ffffff",
+       "alternateColor": "1B4D3E",
+       "logos": [
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500/86.png",
+         "width": 500,
+         "height": 500,
+         "rel": [
+          "full",
+          "default"
+         ]
+        }
+       ]
+      },
+      "score": "3",
+      "linescores": [
+       {
+        "displayValue": "2"
+       },
+       {
+        "displayValue": "2"
+       }
+      ],
+      "possession": false
+     },
+     {
+      "id": "243",
+      "order": 1,
+      "homeAway": "away",
+      "winner": false,
+      "team": {
+       "id": "243",
+       "location": "Sevilla",
+       "name": "Sevilla",
+       "abbreviation": "SEV",
+       "displayName": "Sevilla",
+       "shortDisplayName": "Sevilla",
+       "color": "ffffff",
+       "alternateColor": "d81022",
+       "logos": [
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500/243.png",
+         "width": 500,
+         "height": 500,
+         "rel": [
+          "full",
+          "default"
+         ]
+        }
+       ]
+      },
+      "score": "0",
+      "linescores": [
+       {
+        "displayValue": "0"
+       },
+       {
+        "displayValue": "1"
+       }
+      ],
+      "possession": false
+     }
+    ],
+    "status": {
+     "clock": 4020.0,
+     "displayClock": "67'",
+     "period": 2,
+     "type": {
+      "id": "26",
+      "name": "STATUS_SECOND_HALF",
+      "state": "in",
+      "completed": false,
+      "description": "Second Half",
+      "detail": "67'",
+      "shortDetail": "67'"
+     }
+    },
+    "details": [
+     {
+      "clock": {
+       "value": 1756.0,
+       "displayValue": "30'"
+      },
+      "scoringPlay": true,
+      "team": {
+       "id": "86",
+       "location": "Real Madrid",
+       "name": "Real Madrid",
+       "abbreviation": "RMA",
+       "displayName": "Real Madrid"
+      },
+      "participants": [
+       {
+        "athlete": {
+         "id": "310452",
+         "displayName": "Arda Güler",
+         "shortName": "A. Güler"
+        }
+       },
+       {
+        "athlete": {
+         "id": "402479",
+         "displayName": "Yan Diomande",
+         "shortName": "Y. Diomande"
+        }
+       }
+      ],
+      "addedClock": {
+       "value": 0.0,
+       "displayValue": ""
+      },
+      "redCard": false,
+      "penaltyKick": false,
+      "ownGoal": false
+     },
+     {
+      "clock": {
+       "value": 2185.0,
+       "displayValue": "37'"
+      },
+      "scoringPlay": true,
+      "team": {
+       "id": "86",
+       "location": "Real Madrid",
+       "name": "Real Madrid",
+       "abbreviation": "RMA",
+       "displayName": "Real Madrid"
+      },
+      "participants": [
+       {
+        "athlete": {
+         "id": "231388",
+         "displayName": "Kylian Mbappé",
+         "shortName": "K. Mbappé"
+        }
+       },
+       {
+        "athlete": {
+         "id": "291281",
+         "displayName": "Jude Bellingham",
+         "shortName": "J. Bellingham"
+        }
+       }
+      ],
+      "addedClock": {
+       "value": 0.0,
+       "displayValue": ""
+      },
+      "redCard": false,
+      "penaltyKick": false,
+      "ownGoal": false
+     },
+     {
+      "clock": {
+       "value": 3752.0,
+       "displayValue": "63'"
+      },
+      "scoringPlay": true,
+      "team": {
+       "id": "86",
+       "location": "Real Madrid",
+       "name": "Real Madrid",
+       "abbreviation": "RMA",
+       "displayName": "Real Madrid"
+      },
+      "participants": [
+       {
+        "athlete": {
+         "id": "231388",
+         "displayName": "Kylian Mbappé",
+         "shortName": "K. Mbappé"
+        }
+       }
+      ],
+      "addedClock": {
+       "value": 0.0,
+       "displayValue": ""
+      },
+      "redCard": false,
+      "penaltyKick": true,
+      "ownGoal": false
+     }
+    ],
+    "isFinal": false,
+    "isThirdPlace": false,
+    "altGameNote": "LALIGA",
+    "boxscoreMinutes": false,
+    "shotMapAvailable": true
+   }
+  ],
+  "league": {
+   "id": "740",
+   "name": "Spanish LALIGA",
+   "abbreviation": "LALIGA",
+   "shortName": "LALIGA",
+   "midsizeName": "ESP.1",
+   "slug": "esp.1",
+   "isTournament": false,
+   "logos": [
+    {
+     "href": "https://a.espncdn.com/i/leaguelogos/soccer/500/15.png",
+     "rel": [
+      "full",
+      "default"
+     ]
+    }
+   ]
+  }
+ },
+ "gameInfo": {
+  "venue": {
+   "id": "10630",
+   "fullName": "Santiago Bernabéu",
+   "shortName": "Santiago Bernabéu",
+   "address": {
+    "city": "Madrid",
+    "country": "Spain"
+   },
+   "images": []
+  }
+ },
+ "keyEvents": [
+  {
+   "id": "53925574",
+   "type": {
+    "id": "80",
+    "text": "Kickoff",
+    "type": "kickoff"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 0.0,
+    "displayValue": ""
+   },
+   "scoringPlay": false,
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-18T19:04:15Z",
+   "shootout": false
+  },
+  {
+   "id": "53929869",
+   "type": {
+    "id": "94",
+    "text": "Yellow Card",
+    "type": "yellow-card"
+   },
+   "text": "Félix Correia (Sevilla) is shown the yellow card.",
+   "shortText": "Felix Correia Yellow Card",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1360.0,
+    "displayValue": "23'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "243",
+    "displayName": "Sevilla"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "288900",
+      "displayName": "Felix Correia"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-18T19:26:55Z",
+   "shootout": false
+  },
+  {
+   "id": "53929635",
+   "type": {
+    "id": "94",
+    "text": "Yellow Card",
+    "type": "yellow-card"
+   },
+   "text": "Dean Huijsen (Real Madrid) is shown the yellow card.",
+   "shortText": "Dean Huijsen Yellow Card",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1370.0,
+    "displayValue": "23'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "86",
+    "displayName": "Real Madrid"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "356000",
+      "displayName": "Dean Huijsen"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-18T19:27:05Z",
+   "shootout": false
+  },
+  {
+   "id": "53931016",
+   "type": {
+    "id": "70",
+    "text": "Goal",
+    "type": "goal"
+   },
+   "text": "Goal! Real Madrid 1, Sevilla 0. Arda Güler (Real Madrid) left footed shot from the left side of the box to the top right corner. Assisted by Yan Diomande following a fast break.",
+   "shortText": "Arda Güler Goal",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1756.0,
+    "displayValue": "30'"
+   },
+   "scoringPlay": true,
+   "team": {
+    "id": "86",
+    "displayName": "Real Madrid"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "310452",
+      "displayName": "Arda Güler"
+     }
+    },
+    {
+     "athlete": {
+      "id": "402479",
+      "displayName": "Yan Diomande"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-18T19:33:32Z",
+   "shootout": false,
+   "goalPositionY": 46.4,
+   "fieldPositionX": 83.9,
+   "fieldPositionY": 67.5,
+   "fieldPosition2X": 100.0,
+   "fieldPosition2Y": 46.4
+  },
+  {
+   "id": "53932037",
+   "type": {
+    "id": "70",
+    "text": "Goal",
+    "type": "goal"
+   },
+   "text": "Goal! Real Madrid 2, Sevilla 0. Kylian Mbappé (Real Madrid) left footed shot from the left side of the six yard box to the centre of the goal. Assisted by Jude Bellingham.",
+   "shortText": "Kylian Mbappé Goal",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 2185.0,
+    "displayValue": "37'"
+   },
+   "scoringPlay": true,
+   "team": {
+    "id": "86",
+    "displayName": "Real Madrid"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "231388",
+      "displayName": "Kylian Mbappé"
+     }
+    },
+    {
+     "athlete": {
+      "id": "291281",
+      "displayName": "Jude Bellingham"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-18T19:40:41Z",
+   "shootout": false,
+   "goalPositionY": 50.8,
+   "fieldPositionX": 94.5,
+   "fieldPositionY": 55.8,
+   "fieldPosition2X": 100.0,
+   "fieldPosition2Y": 50.8
+  },
+  {
+   "id": "53933599",
+   "type": {
+    "id": "81",
+    "text": "Halftime",
+    "type": "halftime"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 2700.0,
+    "displayValue": "45'+4'"
+   },
+   "scoringPlay": false,
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-18T19:53:14Z",
+   "shootout": false
+  },
+  {
+   "id": "53936980",
+   "type": {
+    "id": "98",
+    "text": "Penalty - Scored",
+    "type": "penalty---scored"
+   },
+   "text": "Goal! Real Madrid 3, Sevilla 0. Kylian Mbappé (Real Madrid) converts the penalty with a right footed shot to the high centre of the goal.",
+   "shortText": "Kylian Mbappé Penalty - Scored",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3752.0,
+    "displayValue": "63'"
+   },
+   "scoringPlay": true,
+   "team": {
+    "id": "86",
+    "displayName": "Real Madrid"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "231388",
+      "displayName": "Kylian Mbappé"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-18T20:30:38Z",
+   "shootout": false,
+   "goalPositionY": 50.0,
+   "fieldPositionX": 88.5,
+   "fieldPositionY": 50.0,
+   "fieldPosition2X": 100.0,
+   "fieldPosition2Y": 50.0
+  }
+ ]
+}

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ESPN's public JSON: the schedule, the live score and the team crests. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Refresh the schedule after a reboot and re-arm the kick-off alarms. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- The foreground service that polls the live score from 10 minutes before kick-off. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- The goal banner drawn over whatever is playing (granted with appops, see the README). -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Exact alarm 10 minutes before kick-off (Android 12+; falls back to an inexact alarm when denied). -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+
+    <!-- No launcher activity on purpose: this is a data source for the home screen, not an app tile. -->
+    <application
+        android:allowBackup="false"
+        android:icon="@drawable/icon"
+        android:label="@string/app_name"
+        android:supportsRtl="false">
+
+        <provider
+            android:name=".MatchProvider"
+            android:authorities="com.zaid.madridlive.match"
+            android:exported="true"
+            android:grantUriPermissions="false" />
+
+        <!-- Debug and control hook: DEMO (kind=goal|red|kickoff|fulltime|live) and REFRESH. -->
+        <receiver android:name=".ControlReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="com.zaid.madridlive.DEMO" />
+                <action android:name="com.zaid.madridlive.REFRESH" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Boot, app update and our own alarms. -->
+        <receiver android:name=".SystemReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".LiveService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+    </application>
+</manifest>

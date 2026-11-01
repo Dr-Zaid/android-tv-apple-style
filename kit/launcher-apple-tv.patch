@@ -1,0 +1,1058 @@
+diff --git a/launcher/app/src/main/AndroidManifest.xml b/launcher/app/src/main/AndroidManifest.xml
+index 5da0f46..90e34e8 100644
+--- a/launcher/app/src/main/AndroidManifest.xml
++++ b/launcher/app/src/main/AndroidManifest.xml
+@@ -25,6 +25,8 @@
+     <!-- Android 11+ package visibility: lets the launcher list the TV apps it shows as tiles, and the
+          apps that declare a module card (docs/specs/card.md). -->
+     <queries>
++        <!-- Real Madrid Live (addons/madrid-live): the match panel reads its provider. -->
++        <package android:name="com.zaid.madridlive" />
+         <!-- The standard settings handlers, so package visibility doesn't hide them and send the pills to a vendor fallback by mistake. -->
+         <intent>
+             <action android:name="android.settings.SETTINGS" />
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java b/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java
+index e208aa8..a08f3f4 100644
+--- a/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java
++++ b/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java
+@@ -216,6 +216,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+     private final Map<String, String> appLabels, appBanners;
+     /** Every app tile is its icon on a card tinted from that icon, never its banner (config.xml, uniform_tiles). */
+     private final boolean uniformTiles;
++    /** Apple TV focus (config.xml apple_focus): the tile itself lifts, shades and catches the light; no glass slab. */
++    private final boolean appleFocus;
+     private final List<Entry> items = new ArrayList<>();
+ 
+     AppAdapter(Context ctx, TileListener listener, int dockSize, Config cfg) {
+@@ -228,6 +230,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+         this.libraryPreload = new HashSet<>(cfg.libraryApps);
+         this.animations = cfg.animations;
+         this.advancedEffects = cfg.animations && cfg.advancedEffects;
++        this.appleFocus = cfg.animations && !cfg.reducedMotion && ctx.getResources().getBoolean(R.bool.apple_focus);
+         this.showHomeSettings = cfg.showHomeSettingsShortcut;
+         this.showLibrary = cfg.appLibrary;
+         this.reducedMotion = cfg.reducedMotion;
+@@ -426,7 +429,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+             iconLp.bottomMargin = 0;
+             icon.setLayoutParams(iconLp);
+         }
+-        return new Holder(v, listener, animations, advancedEffects, reducedMotion, restNameAlpha, focusOvershoot);
++        return new Holder(v, listener, animations, advancedEffects, reducedMotion, restNameAlpha, focusOvershoot, appleFocus);
+     }
+ 
+     @Override
+@@ -456,8 +459,13 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+         h.name.setAlpha(focused ? 1f : restNameAlpha);
+         h.card.setScaleX(focused && animations ? focusScale() : 1f);
+         h.card.setScaleY(focused && animations ? focusScale() : 1f);
+-        h.card.setTranslationY(focused && advancedEffects ? -4f * ctx.getResources().getDisplayMetrics().density : 0f);
+-        h.card.setTranslationZ(focused && advancedEffects ? 8f * ctx.getResources().getDisplayMetrics().density : 0f);
++        float lift = appleFocus ? APPLE_LIFT_DP : advancedEffects ? 4f : 0f;
++        float shade = appleFocus ? APPLE_SHADOW_DP : advancedEffects ? 8f : 0f;
++        h.card.setTranslationY(focused ? -lift * ctx.getResources().getDisplayMetrics().density : 0f);
++        h.card.setTranslationZ(focused ? shade * ctx.getResources().getDisplayMetrics().density : 0f);
++        h.card.setRotationX(0f);
++        h.card.setRotationY(0f);
++        if (h.sheen != null) h.sheen.focus(focused, false);
+         h.banner.setScaleX(focused && advancedEffects ? 1.035f : 1f);
+         h.banner.setScaleY(focused && advancedEffects ? 1.035f : 1f);
+         // A fully opaque banner covers the whole card (centerCrop), so the card's own fill under it is drawn for
+@@ -642,7 +650,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+     }
+ 
+     float focusScale() {
+-        return !animations ? 1f : advancedEffects ? 1.12f : 1.10f;
++        return !animations ? 1f : appleFocus ? APPLE_SCALE : advancedEffects ? 1.12f : 1.10f;
+     }
+ 
+     /** A vivid colour sampled from the app's banner (or icon), cached per entry; a card's accent when it set one. */
+@@ -655,6 +663,15 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+         return e.ambient;
+     }
+ 
++    /** apple_focus: how far the focused tile grows, rises and casts its shadow, and how far it starts tilted. */
++    static final float APPLE_SCALE = 1.13f;
++    static final float APPLE_LIFT_DP = 7f;
++    static final float APPLE_SHADOW_DP = 14f;
++    static final float APPLE_TILT_DEG = 7f;
++    /** The adapter position focused before this one, for the direction a new tile tilts in from. */
++    static int lastFocusedPosition = -1;
++    static int tiltColumns = 4;
++
+     /** Share of the tile height the icon takes in uniform_tiles mode (onCreateViewHolder). */
+     private static final float ICON_SHARE = 0.62f;
+ 
+@@ -863,9 +880,13 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+         /** Alpha of the name while the tile is not focused (always_show_names). */
+         final float restNameAlpha;
+         final boolean overshoot;
++        final boolean apple;
++        /** apple_focus: the card's light (glare and sweep); null otherwise. */
++        final Sheen sheen;
++        private android.animation.Animator tilt;
+ 
+         Holder(View v, TileListener listener, boolean animations, boolean advancedEffects,
+-               boolean reducedMotion, float restNameAlpha, boolean overshoot) {
++               boolean reducedMotion, float restNameAlpha, boolean overshoot, boolean apple) {
+             super(v);
+             card = v.findViewById(R.id.card);
+             cardBackground = card.getBackground();
+@@ -878,6 +899,13 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+             this.reducedMotion = reducedMotion;
+             this.restNameAlpha = restNameAlpha;
+             this.overshoot = overshoot;
++            this.apple = apple;
++            this.sheen = apple ? new Sheen() : null;
++            if (apple) {
++                card.setForeground(sheen);
++                // A far camera keeps the tilt a gentle lean instead of a perspective swing.
++                card.setCameraDistance(9000f * v.getResources().getDisplayMetrics().density);
++            }
+ 
+             final float density = v.getResources().getDisplayMetrics().density;
+             card.setOutlineProvider(new ViewOutlineProvider() {
+@@ -912,6 +940,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+                     banner.setScaleY(1f);
+                     name.setAlpha(focused ? 1f : restNameAlpha);
+                     name.setTranslationY(0f);
++                } else if (apple) {
++                    appleFocusChange(view, focused, density);
+                 } else if (reducedMotion) {
+                     // A short zoom with no hardware layer: building a layer for so short an animation costs more
+                     // frames than it saves. The name just appears instead of fading.
+@@ -948,5 +978,50 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+                 }
+             });
+         }
++
++        /**
++         * tvOS focus: the tile grows and rises toward the viewer with a soft shadow under it (no bounce), a light
++         * sweeps across it once, and it settles from a slight lean in the direction focus came from, the way an
++         * Apple TV icon sways and steadies. Focus out returns it quickly and flat.
++         */
++        private void appleFocusChange(View view, boolean focused, float density) {
++            if (tilt != null) tilt.cancel();
++            float s = focused ? APPLE_SCALE : 1f;
++            view.animate().scaleX(s).scaleY(s)
++                    .translationY(focused ? -APPLE_LIFT_DP * density : 0f)
++                    .translationZ(focused ? APPLE_SHADOW_DP * density : 0f)
++                    .setDuration(focused ? 200 : 150)
++                    .setInterpolator(new DecelerateInterpolator(2f))
++                    // The hardware layer keeps each frame cheap on a Mali-450 (about 30 ms a frame without it, measured).
++                    .withLayer().start();
++            name.animate().alpha(focused ? 1f : restNameAlpha)
++                    .translationY(focused ? density * 4f : -density * 6f)
++                    .setDuration(focused ? 180 : 120).start();
++            sheen.focus(focused, true);
++            int pos = getBindingAdapterPosition();
++            float rx = 0f, ry = 0f;
++            if (focused && pos != RecyclerView.NO_POSITION && lastFocusedPosition >= 0) {
++                int cols = Math.max(1, tiltColumns);
++                int dc = Integer.signum(pos % cols - lastFocusedPosition % cols);
++                int dr = Integer.signum(pos / cols - lastFocusedPosition / cols);
++                if (dr != 0) rx = dr * APPLE_TILT_DEG * 0.8f;
++                else ry = -dc * APPLE_TILT_DEG;
++            }
++            if (focused && pos != RecyclerView.NO_POSITION) lastFocusedPosition = pos;
++            if (rx == 0f && ry == 0f) {
++                view.setRotationX(0f);
++                view.setRotationY(0f);
++                return;
++            }
++            view.setRotationX(rx);
++            view.setRotationY(ry);
++            android.animation.ObjectAnimator a = android.animation.ObjectAnimator.ofPropertyValuesHolder(view,
++                    android.animation.PropertyValuesHolder.ofFloat(View.ROTATION_X, rx, 0f),
++                    android.animation.PropertyValuesHolder.ofFloat(View.ROTATION_Y, ry, 0f));
++            a.setDuration(420);
++            a.setInterpolator(new DecelerateInterpolator(1.6f));
++            tilt = a;
++            a.start();
++        }
+     }
+ }
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
+index d992768..1181aee 100644
+--- a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
++++ b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
+@@ -61,6 +61,7 @@ import android.view.ViewGroup;
+ import android.view.ViewTreeObserver;
+ import android.view.Window;
+ import android.view.animation.AnimationUtils;
++import android.view.animation.DecelerateInterpolator;
+ import android.view.animation.LayoutAnimationController;
+ import android.widget.FrameLayout;
+ import android.widget.ImageView;
+@@ -168,6 +169,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+     private boolean heroShown;
+     private boolean animations;
+     private boolean advancedEffects;
++    /** config.xml apple_focus: tiles lift and catch the light themselves, no glass slab, quicker shelf and glow. */
++    private boolean appleFocus;
++    /** config.xml apple_header: a small clock pill at the top right instead of the greeting, big clock and date. */
++    private boolean appleHeader;
+     private TextView greeting;
+     private View clockBlock;
+     private View btnInputs;
+@@ -186,6 +191,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+     private TextView stats;
+     private List<RaceWeekend.Race> raceCalendar;
+     private View racePanel;
++    /** Real Madrid's next or live match (config.xml match_panel), from the madrid-live companion app. */
++    private MatchPanel matchPanel;
+     private TextView raceKicker, raceHeadline, raceSessions;
+     /** config.xml show_stats, overridable by a theme. Off: the line is gone and nothing is read. */
+     private boolean showStats;
+@@ -360,6 +367,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         public void run() {
+             updateGreeting();
+             updateRace();
++            if (matchPanel != null) matchPanel.tick();
+             // The pill follows the network callbacks and each return to Home; only the diya's flame follows the
+             // signal level, so only it needs this minute's binder calls (about 7 ms on the UI thread).
+             if (festive) updateWifiLabel();
+@@ -387,6 +395,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         COLUMNS = cfg.columns;
+         animations = cfg.animations;
+         advancedEffects = cfg.animations && cfg.advancedEffects;
++        appleFocus = cfg.animations && !cfg.reducedMotion && getResources().getBoolean(R.bool.apple_focus);
++        AppAdapter.tiltColumns = cfg.columns;
++        appleHeader = getResources().getBoolean(R.bool.apple_header);
+         reducedMotion = cfg.reducedMotion;
+         dockRow = cfg.dockRow;
+         singleRow = cfg.singleRow;
+@@ -469,6 +480,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         stats = findViewById(R.id.stats);
+         raceCalendar = cfg.raceCalendar;
+         racePanel = findViewById(R.id.racePanel);
++        if (getResources().getBoolean(R.bool.match_panel)) {
++            matchPanel = new MatchPanel(this, findViewById(R.id.root), findViewById(R.id.heroScrim));
++        }
+         raceKicker = findViewById(R.id.raceKicker);
+         raceHeadline = findViewById(R.id.raceHeadline);
+         raceSessions = findViewById(R.id.raceSessions);
+@@ -667,7 +681,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+             }
+         });
+         for (SpringAnimation s : new SpringAnimation[]{springX, springY}) {
+-            if (reducedMotion) {
++            if (reducedMotion || appleFocus) {
++                // apple_focus hides the slab; its position still follows focus, in a few frames.
+                 Motion.reduce(s);
+             } else if (!focusOvershoot) {
+                 // Critically damped: glides straight onto the tile without swinging past it.
+@@ -678,6 +693,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+             }
+         }
+ 
++        if (appleFocus) glass.setVisibility(View.GONE);
++
+         btnInputs = findViewById(R.id.btnInputs);
+         View btnSettings = findViewById(R.id.btnSettings);
+         btnInputs.setOnClickListener(v -> showInputs());
+@@ -954,6 +971,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         sky.update();
+         wallpaperPlayer.start();
+         handler.postDelayed(minuteTick, MINUTE_MS);
++        if (matchPanel != null) matchPanel.start();
+         if (festive && diya != null) {
+             diya.start();
+             LocalDate today = LocalDate.now();
+@@ -1127,6 +1145,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         ambient.animate().cancel();
+         heroArt.animate().cancel();
+         handler.removeCallbacks(minuteTick);
++        if (matchPanel != null) matchPanel.stop();
+         stopStats();
+         if (diya != null) diya.stop();
+         cancelPendingFocusScroll();
+@@ -1182,6 +1201,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+     protected void onDestroy() {
+         super.onDestroy();
+         unregisterReceiver(packageReceiver);
++        if (matchPanel != null) matchPanel.close();
+         wallpaperPlayer.close();
+         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
+         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
+@@ -1719,13 +1739,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+             heroShown = true;
+         } else if (changed) {
+             if (advancedEffects) hero.animate().cancel();
+-            hero.animate().alpha(0f).translationX(-12 * density).setDuration(120).withEndAction(() -> {
++            float shift = (appleFocus ? 8 : 12) * density;
++            hero.animate().alpha(0f).translationX(-shift).setDuration(appleFocus ? 70 : 120).withEndAction(() -> {
+                 fillHero(position, label);
+                 hero.setY(y);
+-                hero.setTranslationX(12 * density);
+-                hero.animate().alpha(1f).translationX(0f).setDuration(200).start();
++                hero.setTranslationX(shift);
++                hero.animate().alpha(1f).translationX(0f).setDuration(appleFocus ? 150 : 200)
++                        .setInterpolator(new DecelerateInterpolator(1.5f)).start();
+             }).start();
+-            if (ambientGlow && advancedEffects) {
++            if (ambientGlow && (advancedEffects || appleFocus)) {
+                 transitionAmbient(color);
+             } else if (ambientGlow && color != ambientColor) {
+                 ambient.animate().alpha(0.35f).setDuration(200).withEndAction(() -> {
+@@ -1934,7 +1956,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         }
+         ambient.animate().alpha(1f).setDuration(180).start();
+         ambientAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), ambientColor, color);
+-        ambientAnimator.setDuration(360);
++        ambientAnimator.setDuration(appleFocus ? 240 : 360);
+         ambientAnimator.addUpdateListener(animation -> setAmbient((int) animation.getAnimatedValue()));
+         ambientAnimator.start();
+     }
+@@ -2396,7 +2418,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+ 
+     private void updateClockVisibility() {
+         boolean valid = System.currentTimeMillis() >= TIME_VALID_AFTER_MS;
+-        clockBlock.setVisibility(valid ? View.VISIBLE : View.INVISIBLE);
++        // apple_header: the big clock block stays empty (the time is in the top bar's pill).
++        clockBlock.setVisibility(valid && !appleHeader ? View.VISIBLE : View.INVISIBLE);
++        if (appleHeader) findViewById(R.id.clockPill).setVisibility(valid ? View.VISIBLE : View.GONE);
+         handler.removeCallbacks(clockCheck);
+         if (valid) {
+             updateGreeting();
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/MatchPanel.java b/launcher/app/src/main/java/com/gathin/tvhome/MatchPanel.java
+new file mode 100644
+index 0000000..fe03bb1
+--- /dev/null
++++ b/launcher/app/src/main/java/com/gathin/tvhome/MatchPanel.java
+@@ -0,0 +1,324 @@
++package com.gathin.tvhome;
++
++import android.app.Activity;
++import android.content.BroadcastReceiver;
++import android.content.ContentResolver;
++import android.content.Context;
++import android.content.Intent;
++import android.content.IntentFilter;
++import android.database.Cursor;
++import android.graphics.Bitmap;
++import android.graphics.BitmapFactory;
++import android.net.Uri;
++import android.os.Handler;
++import android.os.Looper;
++import android.text.format.DateFormat;
++import android.view.LayoutInflater;
++import android.view.View;
++import android.view.ViewGroup;
++import android.widget.FrameLayout;
++import android.widget.ImageView;
++import android.widget.TextView;
++
++import java.io.InputStream;
++import java.time.Instant;
++import java.time.LocalDate;
++import java.time.ZoneId;
++import java.time.ZonedDateTime;
++import java.time.format.DateTimeFormatter;
++import java.time.format.TextStyle;
++import java.util.HashMap;
++import java.util.Locale;
++import java.util.Map;
++import java.util.concurrent.ExecutorService;
++import java.util.concurrent.Executors;
++
++/**
++ * Real Madrid's next or live match on Home, from the Real Madrid Live companion app (addons/madrid-live), which owns
++ * the network: this launcher still has no INTERNET permission and only reads the companion's ContentProvider.
++ * Reads run on one background thread, so a cold companion process never stalls Home; any failure keeps what is on
++ * screen, and with no companion (or no match) the panel stays hidden. While a match is live it re-reads every 20 s,
++ * only while Home is showing.
++ */
++final class MatchPanel {
++
++    static final String AUTHORITY = "com.zaid.madridlive.match";
++    static final String ACTION_UPDATED = "com.zaid.madridlive.MATCH_UPDATED";
++    private static final Uri NEXT = Uri.parse("content://" + AUTHORITY + "/next");
++    private static final long LIVE_REFRESH_MS = 20_000;
++    private static final long STALE_MS = 10 * 60_000;
++
++    /** One row of the companion's provider. */
++    static final class Match {
++        String state = "";
++        long kickoffMs;
++        String competition = "", home = "", away = "", homeAbbr = "", awayAbbr = "", clock = "", lastEvent = "";
++        int homeScore = -1, awayScore = -1;
++        long fetchedMs;
++        Bitmap homeCrest, awayCrest;
++
++        boolean live() {
++            return "in".equals(state);
++        }
++
++        boolean finished() {
++            return "post".equals(state);
++        }
++    }
++
++    private final Activity activity;
++    private final View panel;
++    private final View dot;
++    private final TextView kicker, homeName, center, awayName, when;
++    private final ImageView homeCrest, awayCrest;
++    private final Handler handler = new Handler(Looper.getMainLooper());
++    private final ExecutorService io = Executors.newSingleThreadExecutor(r -> {
++        Thread t = new Thread(r, "match-panel");
++        t.setPriority(Thread.MIN_PRIORITY);
++        return t;
++    });
++    /** Crests by team abbreviation, decoded once. */
++    private final Map<String, Bitmap> crests = new HashMap<>();
++    private Match current;
++    private long lastReadMs;
++    private boolean started;
++    private boolean receiverRegistered;
++
++    private final BroadcastReceiver updated = new BroadcastReceiver() {
++        @Override
++        public void onReceive(Context c, Intent i) {
++            refresh();
++        }
++    };
++
++    private final Runnable liveTick = new Runnable() {
++        @Override
++        public void run() {
++            if (!started) return;
++            refresh();
++            handler.postDelayed(this, LIVE_REFRESH_MS);
++        }
++    };
++
++    /** Adds the panel to Home's root, above the cinematic scrim so it stays readable over the artwork. */
++    MatchPanel(Activity activity, FrameLayout root, View above) {
++        this.activity = activity;
++        panel = LayoutInflater.from(activity).inflate(R.layout.match_panel, root, false);
++        int index = above == null ? root.getChildCount() : root.indexOfChild(above) + 1;
++        root.addView(panel, Math.max(0, Math.min(index, root.getChildCount())));
++        dot = panel.findViewById(R.id.matchDot);
++        kicker = panel.findViewById(R.id.matchKicker);
++        homeName = panel.findViewById(R.id.matchHome);
++        center = panel.findViewById(R.id.matchCenter);
++        awayName = panel.findViewById(R.id.matchAway);
++        when = panel.findViewById(R.id.matchWhen);
++        homeCrest = panel.findViewById(R.id.matchHomeCrest);
++        awayCrest = panel.findViewById(R.id.matchAwayCrest);
++    }
++
++    /** Home is showing: listen for the companion's updates and read the row. */
++    void start() {
++        started = true;
++        if (!receiverRegistered) {
++            try {
++                activity.registerReceiver(updated, new IntentFilter(ACTION_UPDATED));
++                receiverRegistered = true;
++            } catch (RuntimeException ignored) {
++                // The minute tick still refreshes.
++            }
++        }
++        refresh();
++        scheduleLive();
++    }
++
++    /** Home is hidden: no reads, no timers. */
++    void stop() {
++        started = false;
++        handler.removeCallbacks(liveTick);
++        if (receiverRegistered) {
++            try {
++                activity.unregisterReceiver(updated);
++            } catch (RuntimeException ignored) {
++            }
++            receiverRegistered = false;
++        }
++    }
++
++    void close() {
++        stop();
++        io.shutdownNow();
++    }
++
++    /** Once a minute with the clock: the countdown moves on; a row older than ten minutes is read again. */
++    void tick() {
++        if (current != null) render(current);
++        if (System.currentTimeMillis() - lastReadMs > STALE_MS) refresh();
++    }
++
++    private void scheduleLive() {
++        handler.removeCallbacks(liveTick);
++        if (started && current != null && current.live()) handler.postDelayed(liveTick, LIVE_REFRESH_MS);
++    }
++
++    void refresh() {
++        if (io.isShutdown()) return;
++        try {
++            io.execute(() -> {
++                Match m = read();
++                handler.post(() -> {
++                    if (activity.isDestroyed()) return;
++                    lastReadMs = System.currentTimeMillis();
++                    boolean wasLive = current != null && current.live();
++                    current = m;
++                    render(m);
++                    if (m != null && m.live() != wasLive) scheduleLive();
++                });
++            });
++        } catch (RuntimeException ignored) {
++            // Executor shut down while Home closed.
++        }
++    }
++
++    /** The companion's row, or null when it is not installed, has no match, or answers with something unexpected. */
++    private Match read() {
++        ContentResolver cr = activity.getContentResolver();
++        try (Cursor c = cr.query(NEXT, null, null, null, null)) {
++            if (c == null || !c.moveToFirst()) return null;
++            Match m = new Match();
++            m.state = str(c, "state");
++            m.kickoffMs = num(c, "kickoff_ms");
++            m.competition = str(c, "competition");
++            m.home = str(c, "home");
++            m.away = str(c, "away");
++            m.homeAbbr = str(c, "home_abbr");
++            m.awayAbbr = str(c, "away_abbr");
++            m.homeScore = (int) num(c, "home_score", -1);
++            m.awayScore = (int) num(c, "away_score", -1);
++            m.clock = str(c, "clock");
++            m.lastEvent = str(c, "last_event");
++            m.fetchedMs = num(c, "fetched_ms");
++            if (m.home.isEmpty() || m.away.isEmpty() || m.kickoffMs <= 0) return null;
++            m.homeCrest = crest(cr, "home", m.homeAbbr);
++            m.awayCrest = crest(cr, "away", m.awayAbbr);
++            return m;
++        } catch (Throwable t) {
++            return current;   // keep what is on screen
++        }
++    }
++
++    private Bitmap crest(ContentResolver cr, String side, String abbr) {
++        String key = abbr.isEmpty() ? side : abbr;
++        Bitmap cached = crests.get(key);
++        if (cached != null) return cached;
++        try (InputStream in = cr.openInputStream(Uri.parse("content://" + AUTHORITY + "/logo/" + side))) {
++            if (in == null) return null;
++            Bitmap b = BitmapFactory.decodeStream(in);
++            if (b != null && !abbr.isEmpty()) crests.put(key, b);
++            return b;
++        } catch (Throwable t) {
++            return null;
++        }
++    }
++
++    private static String str(Cursor c, String col) {
++        int i = c.getColumnIndex(col);
++        if (i < 0 || c.isNull(i)) return "";
++        String s = c.getString(i);
++        return s == null ? "" : s.trim();
++    }
++
++    private static long num(Cursor c, String col) {
++        return num(c, col, 0);
++    }
++
++    private static long num(Cursor c, String col, long fallback) {
++        int i = c.getColumnIndex(col);
++        if (i < 0 || c.isNull(i)) return fallback;
++        try {
++            return c.getLong(i);
++        } catch (RuntimeException e) {
++            return fallback;
++        }
++    }
++
++    private void render(Match m) {
++        if (m == null) {
++            panel.setVisibility(View.GONE);
++            return;
++        }
++        Locale locale = Locale.getDefault();
++        homeName.setText(m.home);
++        awayName.setText(m.away);
++        homeCrest.setImageBitmap(m.homeCrest);
++        homeCrest.setVisibility(m.homeCrest == null ? View.GONE : View.VISIBLE);
++        awayCrest.setImageBitmap(m.awayCrest);
++        awayCrest.setVisibility(m.awayCrest == null ? View.GONE : View.VISIBLE);
++        boolean scored = m.homeScore >= 0 && m.awayScore >= 0;
++        // Scores in Western digits inside a left-to-right isolate: Arabic-Indic digits around a dash are laid out
++        // right to left and "1 – 0" would read "0 – 1".
++        String score = scored ? LRI + String.format(Locale.ROOT, "%d – %d", m.homeScore, m.awayScore) + PDI : "–";
++        if (m.live()) {
++            dot.setVisibility(View.VISIBLE);
++            kicker.setText(join(activity.getString(R.string.match_live), isolate(m.clock)));
++            center.setText(score);
++            when.setText(m.lastEvent.isEmpty() ? m.competition : event(m.lastEvent));
++        } else if (m.finished()) {
++            dot.setVisibility(View.GONE);
++            kicker.setText(join(activity.getString(R.string.match_final), m.competition));
++            center.setText(score);
++            when.setText(event(m.lastEvent));
++            when.setVisibility(m.lastEvent.isEmpty() ? View.GONE : View.VISIBLE);
++        } else {
++            dot.setVisibility(View.GONE);
++            kicker.setText(m.competition);
++            java.text.DateFormat time = DateFormat.getTimeFormat(activity);
++            center.setText(time.format(new java.util.Date(m.kickoffMs)));
++            when.setText(join(dayLabel(m.kickoffMs, locale), countdown(m.kickoffMs - System.currentTimeMillis())));
++        }
++        if (!m.finished()) when.setVisibility(View.VISIBLE);
++        panel.setVisibility(View.VISIBLE);
++    }
++
++    private String dayLabel(long kickoffMs, Locale locale) {
++        ZoneId zone = ZoneId.systemDefault();
++        LocalDate day = Instant.ofEpochMilli(kickoffMs).atZone(zone).toLocalDate();
++        LocalDate today = LocalDate.now(zone);
++        if (day.equals(today)) return activity.getString(R.string.match_today);
++        if (day.equals(today.plusDays(1))) return activity.getString(R.string.match_tomorrow);
++        ZonedDateTime z = Instant.ofEpochMilli(kickoffMs).atZone(zone);
++        if (day.isBefore(today.plusDays(7))) return z.getDayOfWeek().getDisplayName(TextStyle.FULL, locale);
++        return z.format(DateTimeFormatter.ofPattern("EEEE d MMMM", locale));
++    }
++
++    private String countdown(long ms) {
++        if (ms <= 60_000) return activity.getString(R.string.match_kickoff_soon);
++        long minutes = ms / 60_000;
++        if (minutes < 60) return activity.getString(R.string.match_in_minutes, minutes);
++        long hours = minutes / 60;
++        if (hours < 24) return activity.getString(R.string.match_in_hours, hours, minutes % 60);
++        return activity.getString(R.string.match_in_days, hours / 24, hours % 24);
++    }
++
++    /** Unicode first-strong isolates: an English run (a name, a minute) keeps its order inside an Arabic line. */
++    private static final String LRI = "\u2066", PDI = "\u2069";
++
++    private static String isolate(String latin) {
++        return latin == null || latin.isEmpty() ? "" : LRI + latin + PDI;
++    }
++
++    /** The companion's "Goal · Vinícius Jr. 67'": the kind in the TV's language, the rest isolated. */
++    private String event(String e) {
++        if (e == null || e.isEmpty()) return "";
++        int dot = e.indexOf(" · ");
++        if (dot < 0) return isolate(e);
++        String kind = e.substring(0, dot), rest = e.substring(dot + 3);
++        int res = "Goal".equalsIgnoreCase(kind) ? R.string.match_goal : "Red card".equalsIgnoreCase(kind) ? R.string.match_red : 0;
++        return join(res == 0 ? kind : activity.getString(res), isolate(rest));
++    }
++
++    private static String join(String a, String b) {
++        if (b == null || b.isEmpty()) return a;
++        if (a == null || a.isEmpty()) return b;
++        return a + "  ·  " + b;
++    }
++}
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/Sheen.java b/launcher/app/src/main/java/com/gathin/tvhome/Sheen.java
+new file mode 100644
+index 0000000..6bb2784
+--- /dev/null
++++ b/launcher/app/src/main/java/com/gathin/tvhome/Sheen.java
+@@ -0,0 +1,118 @@
++package com.gathin.tvhome;
++
++import android.animation.ValueAnimator;
++import android.graphics.Canvas;
++import android.graphics.ColorFilter;
++import android.graphics.LinearGradient;
++import android.graphics.Matrix;
++import android.graphics.Paint;
++import android.graphics.PixelFormat;
++import android.graphics.Rect;
++import android.graphics.Shader;
++import android.view.animation.DecelerateInterpolator;
++
++import androidx.annotation.NonNull;
++
++/**
++ * Apple TV focus light (config.xml apple_focus): the card's foreground. While the tile is focused a soft glare lies
++ * over its top half, and on focus one diagonal band of light sweeps across it once, as tvOS icons catch the light.
++ * Both are gradients fixed at their size; the sweep only moves the band's shader matrix, so a frame allocates nothing.
++ * The card clips to its rounded outline, so the light keeps the tile's corners.
++ */
++final class Sheen extends android.graphics.drawable.Drawable {
++
++    private static final int GLARE_MS = 180;
++    private static final int SWEEP_MS = 750;
++    /** The moving band of light. Off: on the Mi TV Stick's Mali-450 it redraws the tile for its whole run. */
++    static final boolean SWEEP = false;
++
++    private final Paint glare = new Paint(Paint.ANTI_ALIAS_FLAG);
++    private final Paint band = new Paint(Paint.ANTI_ALIAS_FLAG);
++    private final Matrix matrix = new Matrix();
++    private float bandWidth;
++    /** 0 to 1: how much of the glare shows. */
++    private float glareLevel;
++    /** The band's left edge as a share of the travel, or a negative value while no sweep runs. */
++    private float sweep = -1f;
++    private ValueAnimator glareAnim;
++    private ValueAnimator sweepAnim;
++
++    @Override
++    protected void onBoundsChange(@NonNull Rect b) {
++        if (b.isEmpty()) return;
++        glare.setShader(new LinearGradient(0, b.top, 0, b.top + b.height() * 0.6f,
++                0x33FFFFFF, 0x00FFFFFF, Shader.TileMode.CLAMP));
++        bandWidth = b.width() * 0.5f;
++        // Tilted band: the gradient runs along (1, 0.45), so its stripes lean like light across glass.
++        band.setShader(new LinearGradient(0, 0, bandWidth, bandWidth * 0.45f,
++                new int[]{0x00FFFFFF, 0x2EFFFFFF, 0x00FFFFFF}, new float[]{0f, 0.5f, 1f}, Shader.TileMode.CLAMP));
++    }
++
++    /** Focus in: glare up and one sweep; focus out: glare down, sweep stopped. */
++    void focus(boolean focused, boolean animate) {
++        if (glareAnim != null) glareAnim.cancel();
++        if (sweepAnim != null) sweepAnim.cancel();
++        if (!animate) {
++            glareLevel = focused ? 1f : 0f;
++            sweep = -1f;
++            invalidateSelf();
++            return;
++        }
++        glareAnim = ValueAnimator.ofFloat(glareLevel, focused ? 1f : 0f);
++        glareAnim.setDuration(focused ? GLARE_MS : 120);
++        glareAnim.addUpdateListener(a -> {
++            glareLevel = (float) a.getAnimatedValue();
++            invalidateSelf();
++        });
++        glareAnim.start();
++        if (!focused || !SWEEP) {
++            sweep = -1f;
++            return;
++        }
++        sweepAnim = ValueAnimator.ofFloat(0f, 1f);
++        sweepAnim.setDuration(SWEEP_MS);
++        sweepAnim.setStartDelay(60);
++        sweepAnim.setInterpolator(new DecelerateInterpolator(1.4f));
++        sweepAnim.addUpdateListener(a -> {
++            sweep = (float) a.getAnimatedValue();
++            invalidateSelf();
++        });
++        sweepAnim.addListener(new android.animation.AnimatorListenerAdapter() {
++            @Override
++            public void onAnimationEnd(android.animation.Animator a) {
++                sweep = -1f;
++                invalidateSelf();
++            }
++        });
++        sweepAnim.start();
++    }
++
++    @Override
++    public void draw(@NonNull Canvas canvas) {
++        Rect b = getBounds();
++        if (b.isEmpty()) return;
++        if (glareLevel > 0f) {
++            glare.setAlpha(Math.round(255 * glareLevel));
++            canvas.drawRect(b, glare);
++        }
++        if (sweep >= 0f && band.getShader() != null) {
++            float x = b.left - bandWidth * 1.4f + sweep * (b.width() + bandWidth * 2f);
++            matrix.setTranslate(x, b.top);
++            band.getShader().setLocalMatrix(matrix);
++            canvas.drawRect(b, band);
++        }
++    }
++
++    @Override
++    public void setAlpha(int alpha) {
++    }
++
++    @Override
++    public void setColorFilter(ColorFilter colorFilter) {
++    }
++
++    @Override
++    public int getOpacity() {
++        return PixelFormat.TRANSLUCENT;
++    }
++}
+diff --git a/launcher/app/src/main/res/drawable/match_bg.xml b/launcher/app/src/main/res/drawable/match_bg.xml
+new file mode 100644
+index 0000000..4b38515
+--- /dev/null
++++ b/launcher/app/src/main/res/drawable/match_bg.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Real Madrid panel: dark glass like the top bar's pills, without a blur. -->
++<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
++    <corners android:radius="24dp" />
++    <solid android:color="#A6141418" />
++    <stroke android:width="1dp" android:color="#2EFFFFFF" />
++</shape>
+diff --git a/launcher/app/src/main/res/drawable/match_live_dot.xml b/launcher/app/src/main/res/drawable/match_live_dot.xml
+new file mode 100644
+index 0000000..a16890b
+--- /dev/null
++++ b/launcher/app/src/main/res/drawable/match_live_dot.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
++    <solid android:color="#FFFF3B30" />
++    <size android:width="8dp" android:height="8dp" />
++</shape>
+diff --git a/launcher/app/src/main/res/layout/activity_main.xml b/launcher/app/src/main/res/layout/activity_main.xml
+index 3980580..482f5b6 100644
+--- a/launcher/app/src/main/res/layout/activity_main.xml
++++ b/launcher/app/src/main/res/layout/activity_main.xml
+@@ -322,6 +322,14 @@
+                 android:clipToPadding="false"
+                 android:orientation="horizontal">
+ 
++                <!-- apple_header: the time as a small glass pill, as tvOS shows it, instead of the big clock. -->
++                <TextClock
++                    android:id="@+id/clockPill"
++                    style="@style/TopButton"
++                    android:format12Hour="h:mm"
++                    android:format24Hour="HH:mm"
++                    android:focusable="false"
++                    android:visibility="gone" />
+                 <TextView
+                     android:id="@+id/btnInputs"
+                     style="@style/TopButton"
+diff --git a/launcher/app/src/main/res/layout/match_panel.xml b/launcher/app/src/main/res/layout/match_panel.xml
+new file mode 100644
+index 0000000..c0bb283
+--- /dev/null
++++ b/launcher/app/src/main/res/layout/match_panel.xml
+@@ -0,0 +1,104 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Real Madrid's next or live match (MatchPanel), top left where apple_header leaves the big clock out. Never
++     focusable: it informs, the remote stays on the tiles. -->
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:id="@+id/matchPanel"
++    android:layout_width="wrap_content"
++    android:layout_height="wrap_content"
++    android:layout_gravity="top|left"
++    android:layout_marginStart="56dp"
++    android:layout_marginTop="24dp"
++    android:paddingStart="20dp"
++    android:paddingEnd="22dp"
++    android:paddingTop="14dp"
++    android:paddingBottom="14dp"
++    android:background="@drawable/match_bg"
++    android:orientation="vertical"
++    android:focusable="false"
++    android:importantForAccessibility="no"
++    android:visibility="gone">
++    <LinearLayout
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:gravity="center_vertical"
++        android:orientation="horizontal">
++        <View
++            android:id="@+id/matchDot"
++            android:layout_width="8dp"
++            android:layout_height="8dp"
++            android:layout_marginEnd="8dp"
++            android:background="@drawable/match_live_dot"
++            android:visibility="gone" />
++        <TextView
++            android:id="@+id/matchKicker"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:singleLine="true"
++            android:textColor="#B3FFFFFF"
++            android:textSize="12sp"
++            android:fontFamily="@string/font_medium"
++            android:letterSpacing="0.16"
++            android:textAllCaps="true" />
++    </LinearLayout>
++    <LinearLayout
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="10dp"
++        android:gravity="center_vertical"
++        android:orientation="horizontal">
++        <ImageView
++            android:id="@+id/matchHomeCrest"
++            android:layout_width="34dp"
++            android:layout_height="34dp"
++            android:scaleType="fitCenter"
++            android:contentDescription="@null" />
++        <TextView
++            android:id="@+id/matchHome"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_marginStart="10dp"
++            android:maxWidth="170dp"
++            android:singleLine="true"
++            android:ellipsize="end"
++            android:textColor="#FFFFFFFF"
++            android:textSize="19sp"
++            android:fontFamily="@string/font_medium" />
++        <TextView
++            android:id="@+id/matchCenter"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_marginStart="16dp"
++            android:layout_marginEnd="16dp"
++            android:singleLine="true"
++            android:textColor="#FFFFFFFF"
++            android:textSize="26sp"
++            android:fontFamily="@string/font_light"
++            android:includeFontPadding="false" />
++        <TextView
++            android:id="@+id/matchAway"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:maxWidth="170dp"
++            android:singleLine="true"
++            android:ellipsize="end"
++            android:textColor="#FFFFFFFF"
++            android:textSize="19sp"
++            android:fontFamily="@string/font_medium" />
++        <ImageView
++            android:id="@+id/matchAwayCrest"
++            android:layout_width="34dp"
++            android:layout_height="34dp"
++            android:layout_marginStart="10dp"
++            android:scaleType="fitCenter"
++            android:contentDescription="@null" />
++    </LinearLayout>
++    <TextView
++        android:id="@+id/matchWhen"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="9dp"
++        android:singleLine="true"
++        android:textColor="#C7FFFFFF"
++        android:textSize="14sp"
++        android:fontFamily="@string/font_regular" />
++</LinearLayout>
+diff --git a/launcher/app/src/main/res/values-ar/match_strings.xml b/launcher/app/src/main/res/values-ar/match_strings.xml
+new file mode 100644
+index 0000000..900ef5b
+--- /dev/null
++++ b/launcher/app/src/main/res/values-ar/match_strings.xml
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <string name="match_live">مباشر</string>
++    <string name="match_final">انتهت المباراة</string>
++    <string name="match_today">اليوم</string>
++    <string name="match_tomorrow">غدًا</string>
++    <string name="match_in_minutes">بعد %1$d دقيقة</string>
++    <string name="match_in_hours">بعد %1$d س %2$d د</string>
++    <string name="match_in_days">بعد %1$d يوم و%2$d س</string>
++    <string name="match_kickoff_soon">تبدأ الآن</string>
++    <string name="match_goal">هدف</string>
++    <string name="match_red">بطاقة حمراء</string>
++</resources>
+diff --git a/launcher/app/src/main/res/values/config.xml b/launcher/app/src/main/res/values/config.xml
+index 8dbd32b..623666e 100644
+--- a/launcher/app/src/main/res/values/config.xml
++++ b/launcher/app/src/main/res/values/config.xml
+@@ -17,10 +17,10 @@
+ 
+     <!-- Apps pinned to the dock row at the bottom, in this order. Missing apps are skipped. -->
+     <string-array name="dock_apps">
+-        <item>com.netflix.ninja</item>
+-        <item>com.amazon.amazonvideo.livingroom</item>
+         <item>com.google.android.youtube.tv</item>
+-        <item>in.startv.hotstar</item>
++        <item>com.rmtv.tv</item>
++        <item>com.vodu.tv</item>
++        <item>com.android.vending</item>
+     </string-array>
+     <!-- With fewer dock_apps than columns (or a dock app that is not installed), the free dock slots take
+          the first grid apps, so the dock never shows a gap. false leaves them empty (#162); a theme can
+@@ -31,10 +31,11 @@
+     <string-array name="hidden_apps">
+         <item>com.mediatek.wwtv.tvcenter</item>
+         <item>com.mitv.gallery</item>
++        <item>com.google.android.tv</item>
+     </string-array>
+ 
+     <!-- The TV's Live TV / tuner app, offered at the end of the Inputs menu. Leave empty to omit. -->
+-    <string name="live_tv_package" translatable="false">com.mediatek.wwtv.tvcenter</string>
++    <string name="live_tv_package" translatable="false"></string>
+ 
+     <!-- Open the Live TV app above the first time Home comes up after the TV is switched on, for sets that are
+          mostly used for broadcast TV. Once per boot: Home after that stays Home. Can also be set with
+@@ -206,7 +207,7 @@
+     <!-- A name after the greeting: "Mr. Trịnh" shows GOOD MORNING, MR. TRỊNH. Empty: the greeting alone. -->
+     <string name="greeting_name" translatable="false"></string>
+     <!-- The greeting above the clock ("Good evening"). false hides it. Can also be set with "show_greeting" in a theme. -->
+-    <bool name="show_greeting">true</bool>
++    <bool name="show_greeting">false</bool>
+     <!-- The date and the line between the clock and the date in the clock's full white instead of dimmed. Can also be
+          set with "header_white" in a theme. -->
+     <bool name="header_white">false</bool>
+@@ -227,7 +228,7 @@
+     <!-- The dock band as light frosted glass, like the Inputs, Wi-Fi and Settings pills, so a sky or wallpaper shows
+          through it. false (the default) keeps the solid near-black band, or the cinematic shelf's dark glass. Can
+          also be set with "dock_glass": true in a theme's config.json. -->
+-    <bool name="dock_glass">false</bool>
++    <bool name="dock_glass">true</bool>
+     <!-- Every app in one row: the dock apps first, the rest after them, and the row scrolls sideways when focus
+          reaches its edge. No grid below; rows_below_dock is ignored. Needs dock_row. Can also be set with
+          "single_row" in a theme. -->
+@@ -244,7 +245,7 @@
+     <bool name="reorder_button">false</bool>
+     <!-- Wi-Fi and Settings as round icon-only buttons (the network name moves to the talkback description);
+          Inputs keeps its label. -->
+-    <bool name="icon_only_buttons">false</bool>
++    <bool name="icon_only_buttons">true</bool>
+     <!-- The Inputs pill as a round icon button too (the label moves to the talkback description). -->
+     <bool name="icon_only_inputs">false</bool>
+     <!-- true colours the Wi-Fi pill's icon green while the TV is online and leaves it white while it is not (dark on
+@@ -270,7 +271,7 @@
+     </string-array>
+     <!-- The Inputs pill in the top bar, shown when the TV has inputs to list. false hides it for good; what the
+          remote's Input button does is unchanged. Can also be set with "show_inputs_pill" in a theme. -->
+-    <bool name="show_inputs_pill">true</bool>
++    <bool name="show_inputs_pill">false</bool>
+     <!-- Names under every tile, not only the focused one: unfocused names stay dimmed, the focused one is full white.
+          With dock_row the band grows down to hold the dock's names too. -->
+     <bool name="always_show_names">false</bool>
+@@ -345,7 +346,15 @@
+          before settling. false: both go straight there, with no bounce, while scrolling stays smooth
+          (reduced_motion also removes the overshoot, but scrolls in one jump). Can also be set with
+          "focus_overshoot" in a theme's config.json. -->
+-    <bool name="focus_overshoot">true</bool>
++    <bool name="focus_overshoot">false</bool>
++    <!-- Apple TV focus: no sliding glass slab; the focused tile itself grows, rises with a soft shadow, catches one
++         sweep of light and settles from a slight tilt, with quicker, bounce-free shelf and glow changes. -->
++    <bool name="apple_focus">true</bool>
++    <!-- Apple TV header: the time as a small pill at the top right instead of the greeting, big clock and date. -->
++    <bool name="apple_header">true</bool>
++    <!-- Real Madrid's next or live match at the top left, from the Real Madrid Live companion app
++         (addons/madrid-live). Hidden while that app is missing or has no match. -->
++    <bool name="match_panel">true</bool>
+ 
+     <!-- One line under the clock: CPU, free memory and free storage. Off by default; a theme can set
+          "show_stats": true. Nothing is read, and the clock does not move, while this is false. -->
+@@ -366,10 +375,10 @@
+          colour; the shelf gets a larger name, a "Last opened" line (from the apps Home opened) and dock position
+          dots, the focus glow takes the app's colour and the dock band turns translucent. false keeps the plain
+          shelf. Can also be set with "cinematic_home": true in a theme's config.json. -->
+-    <bool name="cinematic_home">false</bool>
++    <bool name="cinematic_home">true</bool>
+     <!-- With cinematic_home, false leaves out the dock position dots under the app's name, for a quieter shelf. Can
+          also be set with "cinematic_dots": false in a theme's config.json. -->
+-    <bool name="cinematic_dots">true</bool>
++    <bool name="cinematic_dots">false</bool>
+     <!-- With cinematic_home, true keeps the focus highlight white on the dock instead of the focused app's colour,
+          for wallpapers and banners that clash with it; app_glow still colours every tile. Can also be set with
+          "cinematic_white_focus": true in a theme's config.json. -->
+diff --git a/launcher/app/src/main/res/values/match_strings.xml b/launcher/app/src/main/res/values/match_strings.xml
+new file mode 100644
+index 0000000..10db553
+--- /dev/null
++++ b/launcher/app/src/main/res/values/match_strings.xml
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <string name="match_live">Live</string>
++    <string name="match_final">Full time</string>
++    <string name="match_today">Today</string>
++    <string name="match_tomorrow">Tomorrow</string>
++    <string name="match_in_minutes">in %1$d min</string>
++    <string name="match_in_hours">in %1$d h %2$d min</string>
++    <string name="match_in_days">in %1$d d %2$d h</string>
++    <string name="match_kickoff_soon">Kick-off now</string>
++    <string name="match_goal">Goal</string>
++    <string name="match_red">Red card</string>
++</resources>

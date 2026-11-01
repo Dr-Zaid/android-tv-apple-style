@@ -1,0 +1,59 @@
+# Mi TV Stick (MiTV-AESP0, Android TV 9, PI.2055): everything disabled on this stick.
+# Based on examples/xiaomi-mitv-aesp0/debloat.txt, trimmed to Zaid's answers.
+# Undo all:  tools/restore.sh   (or TV_HOST=<tv ip> tools/restore.sh work/debloat.txt)
+# Re-enable one app:  TV_HOST=<tv ip> tools/venv/bin/python tools/tv.py pm enable com.netflix.ninja
+#
+# Kept on purpose: YouTube, RM TV, VODU, Crunchyroll, Kick, Downloader, File Manager, Play Store + Services,
+# Google Assistant (katniss/pumpkin), Chromecast (mediashell), setupwraith (owns the saved Wi-Fi and casting),
+# Mi Cast (milinkservice), mitv.service, Mi video player, TalkBack, Google TTS, firmware updates.
+# Already disabled before we started: com.google.android.videos (left as it was).
+# The stock launcher com.google.android.tvlauncher is disabled by launcher/build-and-install.sh, not this list.
+
+# Batch 1: Xiaomi + Google telemetry
+com.miui.tv.analytics
+com.google.android.feedback
+com.google.android.tv.bugreportsender
+tv.alphonso.alphonso_eula                   # Alphonso automatic content recognition (viewing tracking)
+
+# Batch 2: PatchWall, content and sponsored rows, partner auto-installs
+com.mitv.tvhome.atv
+com.mitv.tvhome.michannel
+com.xm.webcontent
+com.google.android.tvrecommendations
+android.autoinstalls.config.xiaomi.mibox3
+android.autoinstalls.config.xioami.mibox3
+com.mitv.download.service
+com.xiaomi.android.tvsetup.partnercustomizer
+com.xiaomo.tv.milegal
+
+# Batch 3: apps Zaid doesn't use, preloaded extras, screensavers, Live Channels
+com.netflix.ninja
+com.amazon.amazonvideo.livingroom
+com.sneig.livedrama
+de.cyberdream.tv.launcher                   # DreamEPG, also claimed HOME
+app.BestVideoPlayerr.com
+com.tcl.browser
+com.google.android.play.games
+com.google.android.youtube.tvmusic
+com.google.android.backdrop
+com.android.dreams.basic
+com.mitv.dream
+# com.google.android.tv                     # kept: disable.sh guard, it answers channel links
+
+# Batch 4: setup, accounts, backup and printing plumbing nothing on a TV uses
+com.google.android.partnersetup
+com.google.android.onetimeinitializer
+com.android.onetimeinitializer
+com.android.providers.contacts
+com.android.providers.calendar
+com.google.android.syncadapters.contacts
+com.google.android.syncadapters.calendar
+com.google.android.backuptransport
+com.android.backupconfirm
+com.android.sharedstoragebackup
+com.android.wallpaperbackup
+com.android.printspooler
+com.android.settings.intelligence
+com.android.se
+com.android.cts.ctsshim
+com.android.cts.priv.ctsshim
